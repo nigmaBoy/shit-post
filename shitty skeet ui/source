@@ -1,5 +1,6 @@
 -- [[ // gamesense UI Library // ]] --
 -- Skeet/gamesense visual style, raw Instance construction
+-- Load via: loadstring(game:HttpGet("YOUR_RAW_URL"))()
 -- Usage: local gamesense = getgenv().gamesense
 
 if getgenv().gamesense and getgenv().gamesense._Window then
@@ -164,11 +165,12 @@ function Library:CreateWindow(config)
     local TabHolder = Utility:Create("Frame", {
         Parent              = ContentFrame,
         BackgroundColor3    = Color3.fromRGB(12, 12, 12),
-        BackgroundTransparency = 1,
+        BackgroundTransparency = 0,
         BorderSizePixel     = 0,
         Position            = UDim2.new(0, 0, 0, 14),
         Size                = UDim2.new(0, 73, 0, 0),
-        ZIndex              = 5,
+        AutomaticSize       = Enum.AutomaticSize.Y,
+        ZIndex              = 4,
     })
     -- Normal tabs stack from the top
     local TabListLayout = Utility:Create("UIListLayout", {
@@ -182,26 +184,25 @@ function Library:CreateWindow(config)
     local ConfigTabHolder = Utility:Create("Frame", {
         Parent              = ContentFrame,
         BackgroundColor3    = Color3.fromRGB(12, 12, 12),
-        BackgroundTransparency = 1,
+        BackgroundTransparency = 0,
         BorderSizePixel     = 0,
         Position            = UDim2.new(0, 0, 1, -86),
         Size                = UDim2.new(0, 73, 0, 64),
-        ZIndex              = 5,
+        ZIndex              = 4,
     })
 
-    -- Mid filler — solid dark strip that fills the sidebar between the bottom of
-    -- TabHolder (which grows as tabs are added) and the top of ConfigTabHolder.
-    -- Position: starts at Y=14 (below TopGap), height fills to ConfigTabHolder top.
-    -- ConfigTabHolder top = ContentFrame.AbsoluteSize.Y - 86
-    -- So height = (ContentFrame.AbsoluteSize.Y - 86) - 14 = ContentFrame.AbsoluteSize.Y - 100
-    -- We express this as UDim2: from Y=14 with height = 1*parent - 100 offset.
+    -- Mid filler — covers the entire sidebar height from below TopGap (Y=14) to
+    -- above BottomGap (Y = parent - 22). This one solid frame fills everything;
+    -- TabHolder tabs sit on top of it (ZIndex 25+) and ConfigTabHolder sits on top
+    -- of it too, so we never get a bare-content-area bleed-through on either side.
+    -- Size: position Y=14, height = 1*parent - 36  (14 top + 22 bottom)
     local MidFill = Utility:Create("Frame", {
         Parent           = ContentFrame,
         BackgroundColor3 = Color3.fromRGB(12, 12, 12),
         BorderSizePixel  = 0,
         Position         = UDim2.new(0, 0, 0, 14),
-        Size             = UDim2.new(0, 73, 1, -100),  -- fills from below TopGap to above ConfigTabHolder
-        ZIndex           = 3,                           -- behind tab buttons (ZIndex 25+) but above content
+        Size             = UDim2.new(0, 73, 1, -36),
+        ZIndex           = 3,
     })
     -- Right-edge border line on the filler (matches the sidebar separator style)
     local MidFillSideFix = Utility:Create("Frame", {
