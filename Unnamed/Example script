@@ -1,0 +1,137 @@
+-- [[ Load Library ]]
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/nigmaBoy/shit-post/refs/heads/main/Unnamed/source"))()
+
+-- [[ Example Window ]]
+local ExampleWindow = Library:CreateWindow({
+    WindowName = "Example Window",
+    Color = Color3.fromRGB(170, 85, 255),
+    ToggleKeybind = "RightShift"
+}, game.CoreGui)
+
+-- [[ Example Tab ]]
+local ExampleTab = ExampleWindow:CreateTab("Example Tab")
+
+-- ========================================================================
+-- SECTION 1 (This will automatically go to the LEFT side because both sides start at 0 height)
+-- ========================================================================
+local ExampleSectionOne = ExampleTab:CreateSection("Example Section One")
+
+-- 1. Example Label
+local ExampleLabel = ExampleSectionOne:CreateLabel("Example Label")
+ExampleLabel:UpdateText("Example Label (Updated!)") -- Method: UpdateText
+
+-- 2. Example Button
+local ExampleButton = ExampleSectionOne:CreateButton("Example Button", function()
+    print("Example Button Clicked!")
+end)
+ExampleButton:AddToolTip("Example Button Tooltip") -- Method: AddToolTip
+
+-- 3. Example TextBox
+local ExampleTextBox = ExampleSectionOne:CreateTextBox("Example TextBox", "Example Placeholder", false, function(Value)
+    print("Example TextBox Input:", Value)
+end)
+ExampleTextBox:AddToolTip("Example TextBox Tooltip")
+ExampleTextBox:SetValue("Example Forced Value") -- Method: SetValue
+
+-- 4. Example Toggle (Using nil for default to avoid the library bug)
+local ExampleToggle = ExampleSectionOne:CreateToggle("Example Toggle", nil, function(State)
+    print("Example Toggle State:", State)
+end)
+ExampleToggle:AddToolTip("Example Toggle Tooltip")
+ExampleToggle:SetState(true) -- Method: SetState
+print("Current Toggle State:", ExampleToggle:GetState()) -- Method: GetState
+
+-- 5. Example Keybind (Attached to Example Toggle)
+local ExampleKeybind = ExampleToggle:CreateKeybind("E", function(Key)
+    print("Example Keybind Pressed:", Key)
+end)
+ExampleKeybind:SetBind("Q") -- Method: SetBind
+print("Current Keybind:", ExampleKeybind:GetBind()) -- Method: GetBind
+
+-- 6. Example Slider
+local ExampleSlider = ExampleSectionOne:CreateSlider("Example Slider", 0, 100, 50, true, function(Value)
+    print("Example Slider Value:", Value)
+end)
+ExampleSlider:AddToolTip("Example Slider Tooltip")
+ExampleSlider:SetValue(75) -- Method: SetValue
+print("Current Slider Value:", ExampleSlider:GetValue()) -- Method: GetValue
+
+
+-- ========================================================================
+-- SECTION 2 (Because Section 1 made the Left side very tall, your library 
+-- will automatically place this section on the RIGHT side to balance it out!)
+-- ========================================================================
+local ExampleSectionTwo = ExampleTab:CreateSection("Example Section Two")
+
+-- 7. Example Dropdown (Single Select)
+local ExampleDropdownSingle = ExampleSectionTwo:CreateDropdown("Example Dropdown Single", {"Example 1", "Example 2", "Example 3"}, function(Option)
+    print("Example Dropdown Selected:", Option)
+end, "Example 1", false)
+
+ExampleDropdownSingle:AddToolTip("Example Dropdown Tooltip")
+ExampleDropdownSingle:AddOption("Example 4") -- Method: AddOption
+ExampleDropdownSingle:RemoveOption("Example 2") -- Method: RemoveOption
+ExampleDropdownSingle:SetOption("Example 3") -- Method: SetOption
+print("Current Single Dropdown:", ExampleDropdownSingle:GetOption()) -- Method: GetOption
+
+-- 8. Example Dropdown (Multi Select)
+local ExampleDropdownMulti = ExampleSectionTwo:CreateDropdown("Example Dropdown Multi", {"Example A", "Example B", "Example C"}, function(OptionsTable)
+    print("Example Multi Selected:", table.concat(OptionsTable, ", "))
+end, {"Example A"}, true) -- 'true' enables multi-select
+
+-- ExampleDropdownMulti:ClearOptions() -- Method: ClearOptions (Commented out so it doesn't delete them immediately)
+
+-- 9. Example Colorpicker
+local ExampleColorpicker = ExampleSectionTwo:CreateColorpicker("Example Colorpicker", function(Color)
+    print("Example Colorpicker Color:", Color)
+end)
+ExampleColorpicker:AddToolTip("Example Colorpicker Tooltip")
+ExampleColorpicker:UpdateColor(Color3.fromRGB(0, 255, 0)) -- Method: UpdateColor
+
+-- 10. Example Raw Container 
+-- (Gets the raw ScrollingFrame so you can parent custom Roblox instances to it)
+local ExampleRawContainer = ExampleSectionTwo:GetContainer()
+
+
+-- ========================================================================
+-- SECTION 3 (This will automatically go to whichever side is currently the 
+-- shortest between Left and Right)
+-- ========================================================================
+local ExampleSectionThree = ExampleTab:CreateSection("Example Window Methods")
+
+-- 11. Example Window Modifications (Triggered by buttons to showcase them)
+ExampleSectionThree:CreateButton("Example Change Color", function()
+    ExampleWindow:ChangeColor(Color3.fromRGB(255, 0, 0))
+end)
+
+ExampleSectionThree:CreateButton("Example Change Bg Color", function()
+    ExampleWindow:ChangeBgColor(Color3.fromRGB(20, 20, 20))
+end)
+
+ExampleSectionThree:CreateButton("Example Change Text Color", function()
+    ExampleWindow:ChangeTextColor(Color3.fromRGB(200, 200, 200))
+end)
+
+ExampleSectionThree:CreateButton("Example Set Background Image", function()
+    ExampleWindow:SetBackground("6073743871") -- Abstract image ID from your lib
+end)
+
+ExampleSectionThree:CreateButton("Example Set Background Tint", function()
+    ExampleWindow:SetBackgroundColor(Color3.fromRGB(50, 50, 150))
+end)
+
+ExampleSectionThree:CreateSlider("Example Background Transparency", 0, 100, 50, true, function(Value)
+    ExampleWindow:SetBackgroundTransparency(Value / 100)
+end)
+
+ExampleSectionThree:CreateSlider("Example Tile Offset", 0, 100, 0, true, function(Value)
+    ExampleWindow:SetTileOffset(Value)
+end)
+
+ExampleSectionThree:CreateSlider("Example Tile Scale", 0, 5, 1, false, function(Value)
+    ExampleWindow:SetTileScale(Value)
+end)
+
+ExampleSectionThree:CreateButton("Example Unload Window", function()
+    ExampleWindow:Unload()
+end)
