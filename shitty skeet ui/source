@@ -1,6 +1,5 @@
 -- [[ // gamesense UI Library // ]] --
 -- Skeet/gamesense visual style, raw Instance construction
--- Load via: loadstring(game:HttpGet("YOUR_RAW_URL"))()
 -- Usage: local gamesense = getgenv().gamesense
 
 if getgenv().gamesense and getgenv().gamesense._Window then
@@ -179,15 +178,47 @@ function Library:CreateWindow(config)
         Padding            = UDim.new(0, 0),
     })
 
-    -- Config tab holder — pinned to the bottom of the sidebar
+    -- Config tab holder — pinned to the bottom of the sidebar (64px tab + 22px bottom gap)
     local ConfigTabHolder = Utility:Create("Frame", {
         Parent              = ContentFrame,
         BackgroundColor3    = Color3.fromRGB(12, 12, 12),
         BackgroundTransparency = 1,
         BorderSizePixel     = 0,
-        Position            = UDim2.new(0, 0, 1, -86),   -- 64px tab + 22px bottom gap
+        Position            = UDim2.new(0, 0, 1, -86),
         Size                = UDim2.new(0, 73, 0, 64),
         ZIndex              = 5,
+    })
+
+    -- Mid filler — solid dark strip that fills the sidebar between the bottom of
+    -- TabHolder (which grows as tabs are added) and the top of ConfigTabHolder.
+    -- Position: starts at Y=14 (below TopGap), height fills to ConfigTabHolder top.
+    -- ConfigTabHolder top = ContentFrame.AbsoluteSize.Y - 86
+    -- So height = (ContentFrame.AbsoluteSize.Y - 86) - 14 = ContentFrame.AbsoluteSize.Y - 100
+    -- We express this as UDim2: from Y=14 with height = 1*parent - 100 offset.
+    local MidFill = Utility:Create("Frame", {
+        Parent           = ContentFrame,
+        BackgroundColor3 = Color3.fromRGB(12, 12, 12),
+        BorderSizePixel  = 0,
+        Position         = UDim2.new(0, 0, 0, 14),
+        Size             = UDim2.new(0, 73, 1, -100),  -- fills from below TopGap to above ConfigTabHolder
+        ZIndex           = 3,                           -- behind tab buttons (ZIndex 25+) but above content
+    })
+    -- Right-edge border line on the filler (matches the sidebar separator style)
+    local MidFillSideFix = Utility:Create("Frame", {
+        Parent           = MidFill,
+        BackgroundColor3 = Color3.fromRGB(0, 0, 0),
+        BorderSizePixel  = 0,
+        Position         = UDim2.new(0, 73, 0, 0),
+        Size             = UDim2.new(0, 1, 1, 0),
+        ZIndex           = 3,
+    })
+    Utility:Create("Frame", {
+        Parent           = MidFillSideFix,
+        BackgroundColor3 = Color3.fromRGB(40, 40, 40),
+        BorderSizePixel  = 0,
+        Position         = UDim2.new(1, 0, 0, 0),
+        Size             = UDim2.new(0, 1, 1, 0),
+        ZIndex           = 3,
     })
 
     -- Top gap (sidebar background strip above first tab)
@@ -267,17 +298,18 @@ function Library:CreateWindow(config)
     })
 
     -- // DRAG LOGIC // --
-    local Dragging, DragInput, DragOffset, DragStart, StartPos
+    -- RenderStepped writes position once per frame instead of every InputChanged
+    -- event, eliminating jitter and lag on high mouse polling rates.
+    local Dragging   = false
+    local DragOffset = Vector2.new(0, 0)
 
     Utility:Connect(MainFrame.InputBegan, function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1
             and not Library.Interacting
             and not Library.CurrentPopup
         then
-            Dragging  = true
+            Dragging   = true
             DragOffset = UserInputService:GetMouseLocation() - MainFrame.AbsolutePosition
-            DragStart  = input.Position
-            StartPos   = MainFrame.Position
         end
     end)
 
@@ -287,22 +319,12 @@ function Library:CreateWindow(config)
         end
     end)
 
-    Utility:Connect(MainFrame.InputChanged, function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement then
-            DragInput = input
-        end
-    end)
-
-    Utility:Connect(UserInputService.InputChanged, function(input)
-        if input == DragInput and Dragging then
-            local ParentSize = MainFrame.Parent.AbsoluteSize
-            local StartX = (StartPos.X.Scale * ParentSize.X) + StartPos.X.Offset
-            local StartY = (StartPos.Y.Scale * ParentSize.Y) + StartPos.Y.Offset
-            local Delta  = input.Position - DragStart
-            local SnapX  = math.floor((StartX + Delta.X) / 2) * 2
-            local SnapY  = math.floor((StartY + Delta.Y) / 2) * 2
-            MainFrame.Position = UDim2.fromOffset(SnapX, SnapY)
-        end
+    RunService.RenderStepped:Connect(function()
+        if not Dragging then return end
+        local mouse = UserInputService:GetMouseLocation()
+        local newX  = math.floor((mouse.X - DragOffset.X) / 2) * 2
+        local newY  = math.floor((mouse.Y - DragOffset.Y) / 2) * 2
+        MainFrame.Position = UDim2.fromOffset(newX, newY)
     end)
 
     -- Close popups when clicking outside the main frame
